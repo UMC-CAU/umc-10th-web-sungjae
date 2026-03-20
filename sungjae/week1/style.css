@@ -1,0 +1,90 @@
+body{
+  background-color: #f5f5f5;
+  height: 100vh; /*이게 있어야 세로 중앙 정렬이 가능하다 */
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.todo-container{
+  background-color: rgb(210, 233, 255);
+  width: 500px;
+  min-height: 500px;
+  padding: 10px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.todo-container__input{
+  padding: 15px 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  width: 300px;
+  outline:none;
+}
+
+.todo-container__button{
+  padding: 15px 15px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  width:100px;
+  outline: none;
+  cursor: pointer;
+  
+}
+
+.render-container{
+  display:flex; /*할 일, 완료 텍스트를 가로로 나열*/
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.render-container__section{
+  flex:1;
+  min-width:200px;
+}
+
+.render-container__title{
+  text-align: center;
+
+}
+
+/* 할 일 리스트에서 각 항목 */
+.render-container__item {
+    background-color: white;
+    padding: 10px 15px;
+    margin-bottom: 7px;    /* 각 항목들 사이 간격 */
+    border-radius: 8px;
+    display: flex;          /* 입력한 텍스트랑 버튼을 양옆으로 찢기 위해 */
+    justify-content: space-between; /* 텟스트는 왼쪽 버튼은 오른쪽 */
+    align-items: center;    
+}
+
+/* 각 항목 안의 글자 스타일 */
+.render-container__item span {
+    font-size: 20px;
+    color: #333;
+}
+
+/* 버튼 스타일  */
+.render-container__item-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #4caf50; 
+    color: white;
+    transition: background-color 0.2s;
+}
+
+/* 삭제 버튼 전용 스타일 (빨간색) */
+.render-container__item-button--delete {
+    background-color: #e53935; 
+}
