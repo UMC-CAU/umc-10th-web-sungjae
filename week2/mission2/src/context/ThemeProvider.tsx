@@ -1,6 +1,6 @@
 import { createContext, type PropsWithChildren, useContext, useState } from 'react';
 
-// 1. enum 대신 const 객체를 사용합니다 (에러 방지)
+// 
 export const THEME = {
   LIGHT: 'LIGHT',
   DARK: 'DARK',
