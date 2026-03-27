@@ -1,0 +1,35 @@
+# [성재의 2주차 미션 최적화 .gitignore]
+
+# 1. 의존성 및 빌드 결과물 (가장 중요)
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# 2. 로그 파일
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 3. 에디터 및 OS 관련 파일 
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+
+# 4. 과제 제출 시 제외할 설정 파일들
+
+package-lock.json
+.package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 5. 기타 임시 파일
+*.log
+**/*.backup.*
+**/*.back.*
