@@ -8,11 +8,12 @@ interface LinkProps {
 }
 
 export const Link = ({ to, children }: LinkProps) => {
-  const { changePath } = useRouter();
+  const { changePath } = useRouter();//RouterContext에서 주소 바꾸는 changePath 가져옴 
 
+  //사용자가 상단 바에 있는 페이지 클릭 시 실행 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault(); // 브라우저 새로고침하면서 이동하는 것 막음 
-    changePath(to);     // 우리가 직접 경로 수정 
+    e.preventDefault(); // 브라우저가 서버에 새 페이지 요청(새로고침)하면서 렌더링 하는 것을 막음 
+    changePath(to);     // RouterContext에서 가져온 함수 실행 
   };
 
   return (

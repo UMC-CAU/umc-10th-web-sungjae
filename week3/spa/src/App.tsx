@@ -10,6 +10,7 @@ const About = () => <h2>소개 페이지</h2>;
 const First = () => <h2>1 페이지 </h2>
 function App() {
   return (
+    //모든 설정이 완료된 결과물을 모아놓음. 
     <RouterProvider>
       <nav style={{ display: 'flex', gap: '15px', padding: '10px', background: '#eee' }}>
         <Link to="/">홈</Link>
@@ -18,12 +19,12 @@ function App() {
       </nav>
       <main style={{ padding: '20px' }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home />} /> 
           <Route path="/about" element={<About />} />
           <Route path="/first" element={<First />} />
         </Routes>
       </main>
-    </RouterProvider>
+    </RouterProvider> 
   );
 }
 
