@@ -1,3 +1,4 @@
+//[리뷰 답변] 미션1에서는 단순한 단일 페이지여서 App.tsx에서 처리해도 충분했지만 미션2부터 라우터 사용하면서 확장성 있게 관리할 필요가 생겼습니다. 그래서 main.tsx에서 createBrowserRouter 통해 App.tsx 중간 단계없이 각 경로에 맞는 페이지를 직접 연결해주었습니다. 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
