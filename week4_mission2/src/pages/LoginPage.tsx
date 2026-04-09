@@ -23,7 +23,7 @@ const LoginPage = () => {
       
       <div className="flex flex-col items-center w-full max-w-sm">
         
-        {/* ⬅️ 수정 포인트: 로그인 글자와 버튼을 감싸는 flex 컨테이너 추가 */}
+        {/* 로그인 글자와 버튼을 감싸는 flex 컨테이너 추가 */}
         <div className="flex items-center w-full mb-10 relative">
           <button 
             onClick={() => navigate(-1)} 

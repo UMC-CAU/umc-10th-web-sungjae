@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const Navbar = () => {
   return (
     <nav className="flex justify-between items-center px-8 py-4 bg-black text-white sticky top-0 z-50 border-b border-gray-800">
-      {/* 좌상단: 기존의 카테고리 메뉴들을 배치 */}
+      {/* 좌상단: 기존의 카테고리 매뉴 */}
       <div className="flex items-center gap-6 text-sm font-medium">
         <Link to="/" className="hover:text-pink-500 transition">홈</Link>
         <Link to="/movies/popular" className="hover:text-pink-500 transition">인기 영화</Link>

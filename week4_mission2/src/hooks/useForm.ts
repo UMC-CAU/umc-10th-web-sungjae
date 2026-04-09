@@ -20,7 +20,7 @@ const useForm = <T extends Record<string, any>>({ initialValue, validate }: UseF
     setErrors(newErrors);
   };
 
-  // 포커스가 나갔을 때(onBlur) 해당 필드를 '건드림' 상태로 변경
+  // 포커스가 나갔을 때 해당 필드를 건드림 상태로 변경
   const handleBlur = (name: string) => {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
