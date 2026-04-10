@@ -12,6 +12,7 @@ import TopRatedPage from './pages/TopRatedPage';
 import UpcomingPage from './pages/UpcomingPage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import LoginPage from './pages/LoginPage'; // 미션 2 로그인 페이지
+import SignUpPage from './pages/SignUpPage'; // 미션 2 로그인 페이지
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: 'movies/:movieId', element: <MovieDetailPage /> },
       // 미션 2: 로그인 경로 추가
       { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignUpPage /> },
     ],
   },
 ]);

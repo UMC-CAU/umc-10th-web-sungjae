@@ -1,25 +1,25 @@
-export interface UserSigninInformation {
-  email?: string;
-  password?: string;
-}
+import * as z from 'zod';
 
-export const validateSignin = (values: UserSigninInformation) => {
-  const errors: UserSigninInformation = {};
+// 1. 공통적으로 사용할 기본 스키마 정의
+const baseSchema = z.object({
+  email: z.string().email({ message: "올바른 이메일 형식을 입력해주세요." }),
+  password: z.string().min(8, { message: "비밀번호는 8자 이상이어야 합니다." }),
+  name: z.string().min(1, { message: "이름은 필수 입력 항목입니다." }),
+});
 
-  // 이메일 유효성 검사: @와 . 포함 여부 확인
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!values.email) {
-    errors.email = "이메일을 입력해주세요.";
-  } else if (!emailRegex.test(values.email)) {
-    errors.email = "올바른 이메일 형식을 입력해주세요.";
-  }
+// 2. 로그인용 스키마 (이메일, 비밀번호만 사용)
+export const loginSchema = baseSchema.pick({
+  email: true,
+  password: true,
+});
 
-  // 비밀번호 유효성 검사: 8자 이상
-  if (!values.password) {
-    errors.password = "비밀번호를 입력해주세요.";
-  } else if (values.password.length < 8) {
-    errors.password = "비밀번호는 8자 이상이어야 합니다.";
-  }
+// 3. 회원가입용 스키마 (비밀번호 확인 로직 포함)
+export const signupSchema = baseSchema.extend({
+  passwordCheck: z.string(),
+}).refine((data) => data.password === data.passwordCheck, {
+  path: ["passwordCheck"],
+  message: "비밀번호가 일치하지 않습니다.",
+});
 
-  return errors;
-};
+export type SignupSchema = z.infer<typeof signupSchema>;
+export type LoginSchema = z.infer<typeof loginSchema>;
