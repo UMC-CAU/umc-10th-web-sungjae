@@ -26,10 +26,10 @@ const Navbar = () => {
         <Link to="/movies/upcoming" className="hover:text-pink-500 transition">개봉 예정</Link>
       </div>
 
-      {/* 우상단: 로그인 상태에 따른 버튼 교체[cite: 2] */}
+      {/* 우상단: 로그인 상태에 따른 버튼 교체 */}
       <div className="flex gap-3">
         {isLoggedIn ? (
-          // 로그인 성공 시 보일 버튼들[cite: 2]
+          // 로그인 성공 시 보일 버튼들
           <>
             <Link
               to="/mypage"
@@ -45,7 +45,7 @@ const Navbar = () => {
             </button>
           </>
         ) : (
-          // 로그인 안 된 상태에서 보일 버튼들[cite: 2]
+          // 로그인 안 된 상태에서 보일 버튼들
           <>
             <Link
               to="/login"
