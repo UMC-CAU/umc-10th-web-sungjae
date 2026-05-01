@@ -34,9 +34,9 @@ const LoginPage = () => {
     }
   };
 
-  // 🌐 구글 로그인 처리 (미션 3 핵심)
+  // 구글 로그인 처리 
   const handleGoogleLogin = () => {
-    // 관리자 가이드: 백엔드 8000번 포트의 로그인 시작 주소로 이동
+    // 관리자: 백엔드 8000번 포트의 로그인 시작 주소로 이동
     window.location.href = 'http://localhost:8000/v1/auth/google/login';
   };
 
@@ -57,7 +57,7 @@ const LoginPage = () => {
         </div>
 
         <form onSubmit={handleSubmit(onLoginSubmit)} className="flex flex-col gap-6 w-full mb-6">
-          {/* 이메일 입력 섹션 */}
+          {/* 이메일 입력  */}
           <div className="flex flex-col gap-2">
             <input
               {...register('email')}
@@ -70,7 +70,7 @@ const LoginPage = () => {
             )}
           </div>
 
-          {/* 비밀번호 입력 섹션 */}
+          {/* 비밀번호 입력  */}
           <div className="flex flex-col gap-2">
             <input
               {...register('password')}
@@ -96,14 +96,14 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* --- 소셜 로그인 구분선 --- */}
+        {/*소셜 로그인 구분*/}
         <div className="flex items-center w-full gap-4 mb-6">
           <div className="flex-1 h-[1px] bg-gray-700"></div>
           <span className="text-gray-500 text-sm">또는</span>
           <div className="flex-1 h-[1px] bg-gray-700"></div>
         </div>
 
-        {/* --- 구글 로그인 버튼 (미션 3 추가) --- */}
+        {/* 구글 로그인 버튼 */}
         <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-3 p-4 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors"

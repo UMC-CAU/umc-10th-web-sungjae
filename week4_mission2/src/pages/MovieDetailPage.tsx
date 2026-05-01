@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useCustomFetch from '../hooks/useCustomFetch';
-import type { MovieDetail, CreditsResponse } from '../types/movie';
+import type { MovieDetail, CreditsResponse } from '../../types/movie';
 
 const MovieDetailPage = () => {
   const { movieId } = useParams<{ movieId: string }>();

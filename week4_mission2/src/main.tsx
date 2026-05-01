@@ -20,7 +20,7 @@ import GoogleCallback from './pages/GoogleCallback';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />, // 공통 레이아웃 (Navbar 포함)
+    element: <Layout />, // 공통 레이아웃 
     children: [
       { index: true, element: <HomePage /> },
       { path: 'movies/popular', element: <PopularPage /> },
