@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom'; // useNavigate 추가
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import CreatePage from '../../pages/CreatePage';
 
 const Layout = () => {
-  const navigate = useNavigate(); // 네비게이트 함수 생성
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,21 +33,35 @@ const Layout = () => {
         <main style={{ flex: 1, overflowY: 'auto', padding: '20px', backgroundColor: '#f9f9f9' }}>
           <Outlet />
           
-          {/* 플로팅 버튼 (+) 클릭 시 /create로 이동 */}
           <button 
-            onClick={() => navigate('/create')}
+            onClick={() => setIsModalOpen(true)}
             style={{
               position: 'fixed', bottom: '30px', right: '30px',
-              width: '50px', height: '50px', borderRadius: '50%',
+              width: '60px', height: '60px', borderRadius: '50%',
               backgroundColor: '#e91e63', color: '#fff', border: 'none',
-              fontSize: '24px', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-              zIndex: 8
+              fontSize: '30px', cursor: 'pointer', boxShadow: '0 6px 15px rgba(233, 30, 99, 0.3)',
+              zIndex: 8, display: 'flex', justifyContent: 'center', alignItems: 'center'
             }}
           >
             +
           </button>
         </main>
       </div>
+
+     
+      {isModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
+          justifyContent: 'center', alignItems: 'center', zIndex: 100,
+          backdropFilter: 'blur(4px)'
+        }} onClick={() => setIsModalOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            {/* CreatePage에 onClose 프롭스를 반드시 넘겨야 합니다 */}
+            <CreatePage onClose={() => setIsModalOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
