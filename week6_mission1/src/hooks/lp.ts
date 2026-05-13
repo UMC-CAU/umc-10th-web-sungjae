@@ -201,17 +201,48 @@ export const useMyInfo = () => {
   });
 };
 
-// 내 정보 수정 
+// 닉네임(내 정보) 수정 Mutation - 낙관적 업데이트 적용
 export const useUpdateMyInfo = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (updateData: { name: string; bio?: string; profileImage?: string }) => {
       const { data } = await client.patch('/users', updateData);
       return data.data;
     },
-    onSuccess: () => {
+    // [미션 2 핵심] 서버 응답 전 UI를 즉시 업데이트
+    onMutate: async (newInfo) => {
+      // 1. 관련 쿼리 취소 (데이터 꼬임 방지)
+      await queryClient.cancelQueries({ queryKey: ['myInfo'] });
+
+      // 2. 이전 데이터 스냅샷 저장 (롤백용)
+      const previousUserInfo = queryClient.getQueryData(['myInfo']);
+
+      // 3. 캐시 데이터를 새 정보로 즉시 변경
+      queryClient.setQueryData(['myInfo'], (old: any) => ({
+        ...old,
+        ...newInfo,
+      }));
+
+      // 4. [추가 작업] Nav-Bar 등에 즉시 반영하기 위해 로컬스토리지 임시 업데이트
+      const prevName = localStorage.getItem('userName');
+      localStorage.setItem('userName', newInfo.name);
+
+      return { previousUserInfo, prevName };
+    },
+    // 실패 시 롤백 로직
+    onError: (err, newInfo, context) => {
+      if (context?.previousUserInfo) {
+        queryClient.setQueryData(['myInfo'], context.previousUserInfo);
+      }
+      if (context?.prevName) {
+        localStorage.setItem('userName', context.prevName);
+      }
+      alert('정보 수정에 실패하여 이전 상태로 복구합니다.');
+    },
+    // 성공 혹은 실패 후 서버 데이터와 최종 동기화
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['myInfo'] });
-    
     },
   });
 };
