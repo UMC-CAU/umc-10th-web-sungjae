@@ -210,9 +210,9 @@ export const useUpdateMyInfo = () => {
       const { data } = await client.patch('/users', updateData);
       return data.data;
     },
-    // [미션 2 핵심] 서버 응답 전 UI를 즉시 업데이트
+    // 서버 응답 전 UI를 즉시 업데이트
     onMutate: async (newInfo) => {
-      // 1. 관련 쿼리 취소 (데이터 꼬임 방지)
+      // 1. 관련 쿼리 취소 
       await queryClient.cancelQueries({ queryKey: ['myInfo'] });
 
       // 2. 이전 데이터 스냅샷 저장 (롤백용)
@@ -224,7 +224,7 @@ export const useUpdateMyInfo = () => {
         ...newInfo,
       }));
 
-      // 4. [추가 작업] Nav-Bar 등에 즉시 반영하기 위해 로컬스토리지 임시 업데이트
+      // 4. 
       const prevName = localStorage.getItem('userName');
       localStorage.setItem('userName', newInfo.name);
 
