@@ -24,3 +24,14 @@ export const signup = async (data: any) => {
   const response = await client.post('/auth/signup', data);
   return response.data;
 };
+
+
+export const logout = async () => {
+  const response = await client.post('/auth/signout');
+  return response.data;
+};
+
+export const withdraw = async () => {
+  const response = await client.delete('/users');
+  return response.data;
+};

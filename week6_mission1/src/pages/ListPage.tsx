@@ -3,6 +3,7 @@ import { useInView } from 'react-intersection-observer';
 import { useInfiniteLPs } from '../hooks/lp';
 import LPCard from '../components/LPCard';
 
+
 const SkeletonCard = () => (
   <div style={{ 
     width: '100%', 
@@ -27,7 +28,9 @@ const ListPage = () => {
     isFetchingNextPage 
   } = useInfiniteLPs(sortOrder);
 
+
   useEffect(() => {
+
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -100,10 +103,11 @@ const ListPage = () => {
             />
           ))
         )}
+
         {isFetchingNextPage && Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={`next-${i}`} />)}
       </div>
-      
-      <div ref={ref} style={{ height: '20px' }} />
+
+      {hasNextPage && !isFetchingNextPage && <div ref={ref} style={{ height: '20px' }} />}
 
       <style>
         {`
