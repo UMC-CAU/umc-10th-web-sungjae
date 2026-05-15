@@ -7,10 +7,10 @@ import {
   useAddComment, 
   useDeleteComment,
   useLikeLP,
-  useDeleteLP
+  useDeleteLP,
+  useUpdateLP
 } from '../hooks/lp';
 
-// 댓글 로딩 스켈레톤
 const CommentSkeleton = () => (
   <div style={{ display: 'flex', gap: '15px', padding: '15px 0', borderBottom: '1px solid #eee', animation: 'pulse 1.5s infinite ease-in-out' }}>
     <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#eee' }} />
@@ -22,66 +22,68 @@ const CommentSkeleton = () => (
 );
 
 const DetailPage = () => {
-  const { lpid } = useParams();
+  const { lpid } = useParams<{ lpid: string }>();
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
   const [commentOrder, setCommentOrder] = useState<'desc' | 'asc'>('desc');
   const [commentText, setCommentText] = useState('');
   
-  // 데이터 페칭
-  const { data: lp, isLoading: isLPLoading, isError: isLPError } = useLPDetail(lpid as string);
-  const { 
-    data: commentData, 
-    isLoading: isCommentLoading,
-    fetchNextPage, 
-    hasNextPage, 
-    isFetchingNextPage 
-  } = useInfiniteComments(lpid as string, commentOrder);
+  const { data: lp, isLoading: isLPLoading, isError: isLPError } = useLPDetail(lpid || '');
+  const { data: commentData, isLoading: isCommentLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteComments(lpid || '', commentOrder);
   
   const { ref, inView } = useInView();
-
-  // Mutations
-  const addCommentMutation = useAddComment(lpid as string);
-  const deleteCommentMutation = useDeleteComment(lpid as string);
+  const addCommentMutation = useAddComment(lpid || '');
+  const deleteCommentMutation = useDeleteComment(lpid || '');
   const deleteLPMutation = useDeleteLP();
-  const likeMutation = useLikeLP(lpid as string);
+  const updateLPMutation = useUpdateLP(lpid || ''); 
+  const likeMutation = useLikeLP(lpid || '');
 
-  // 무한 스크롤 로직
+  const [editFields, setEditFields] = useState({ 
+    title: '', content: '', tags: [] as string[], thumbnail: '', published: true 
+  });
+
+  // ✅ [핵심] 서버에서 온 객체 배열 태그 [{id, name}]를 문자열 배열 [name]으로 변환
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+    if (lp) {
+      const formattedTags = Array.isArray(lp.tags) 
+        ? lp.tags.map((tag: any) => typeof tag === 'string' ? tag : tag.name)
+        : [];
 
-  // 에러 발생 시 처리 (흰 화면 방지)
-  if (isLPError) return <div style={{ padding: '100px', textAlign: 'center' }}>데이터를 불러오는 중 에러가 발생했습니다.</div>;
-  if (isLPLoading) return <div style={{ padding: '100px', textAlign: 'center' }}>로딩 중...</div>;
-
-  // 좋아요 버튼 클릭 핸들러
-  const handleLikeClick = () => {
-    if (!localStorage.getItem('accessToken')) {
-      alert('로그인이 필요한 기능입니다.');
-      return;
-    }
-    likeMutation.mutate(lp?.isLiked || false);
-  };
-
-  // 삭제 핸들러
-  const handleDeleteLP = () => {
-    if (window.confirm('정말 이 게시글을 삭제하시겠습니까?')) {
-      deleteLPMutation.mutate(lpid as string, {
-        onSuccess: () => {
-          alert('삭제되었습니다.');
-          navigate('/');
-        }
+      setEditFields({ 
+        title: lp.title || '', 
+        content: lp.content || '', 
+        tags: formattedTags,
+        thumbnail: lp.thumbnail || '',
+        published: lp.published ?? true
       });
     }
-  };
+  }, [lp]);
 
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const renderLikeCount = () => {
-    if (Array.isArray(lp?.likes)) return lp.likes.length;
-    if (typeof lp?.likes === 'number') return lp.likes;
-    return 0;
+  if (isLPError) return <div style={{ padding: '100px', textAlign: 'center' }}>데이터 로드 실패</div>;
+  if (isLPLoading) return <div style={{ padding: '100px', textAlign: 'center' }}>로딩 중...</div>;
+
+  const handleUpdateSubmit = () => {
+    if (!lpid) return;
+    updateLPMutation.mutate({
+      title: editFields.title.trim(),
+      content: editFields.content.trim(),
+      tags: editFields.tags,
+      thumbnail: editFields.thumbnail,
+      published: editFields.published
+    }, {
+      onSuccess: () => {
+        alert('수정되었습니다!');
+        setIsEditing(false);
+      },
+      onError: (err: any) => {
+        console.error('에러 상세:', err.response?.data);
+        alert(`수정 실패: ${err.response?.data?.message || '규격을 확인하세요.'}`);
+      }
+    });
   };
 
   return (
@@ -89,96 +91,76 @@ const DetailPage = () => {
       <div style={{ display: 'flex', gap: '40px', marginBottom: '60px' }}>
         <img src={lp?.thumbnail} style={{ width: '350px', height: '350px', borderRadius: '15px', objectFit: 'cover' }} alt="LP" />
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 style={{ fontSize: '32px', margin: 0 }}>{lp?.title}</h1>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#999' }}>수정</button>
-              <button onClick={handleDeleteLP} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#999' }}>삭제</button>
+              <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>수정</button>
+              <button onClick={() => { if(window.confirm('삭제하시겠습니까?')) deleteLPMutation.mutate(lpid as string, { onSuccess: () => navigate('/') }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>삭제</button>
             </div>
           </div>
-
-          <button 
-            onClick={handleLikeClick}
-            disabled={likeMutation.isPending}
-            style={{ 
-              marginTop: '20px', padding: '8px 16px', borderRadius: '20px', 
-              border: '1px solid #eee', backgroundColor: '#fff', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px',
-              color: lp?.isLiked ? '#e91e63' : '#333'
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>{lp?.isLiked ? '❤️' : '🤍'}</span>
-            <span style={{ fontWeight: 'bold' }}>{renderLikeCount()}</span>
+          <button onClick={() => likeMutation.mutate(lp?.isLiked)} style={{ marginTop: '15px', background: '#fff', border: '1px solid #eee', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer' }}>
+            ❤️ {Array.isArray(lp?.likes) ? lp.likes.length : (lp?.likes || 0)}
           </button>
-
-          <div style={{ display: 'flex', gap: '8px', margin: '20px 0' }}>
-            {lp?.tags?.map((tag: string) => (
-              <span key={tag} style={{ backgroundColor: '#f0f0f0', padding: '5px 12px', borderRadius: '15px', fontSize: '13px' }}>#{tag}</span>
+          
+          {/* 태그 렌더링 수정: 객체 배열 대응 */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '15px' }}>
+            {lp?.tags?.map((tag: any) => (
+              <span key={tag.id || tag} style={{ background: '#f0f0f0', padding: '4px 10px', borderRadius: '15px', fontSize: '13px' }}>
+                #{typeof tag === 'string' ? tag : tag.name}
+              </span>
             ))}
           </div>
-          <p style={{ lineHeight: '1.8', color: '#555', whiteSpace: 'pre-wrap' }}>{lp?.content}</p>
+
+          <p style={{ marginTop: '20px', lineHeight: '1.8', color: '#555', whiteSpace: 'pre-wrap' }}>{lp?.content}</p>
         </div>
       </div>
 
       <hr style={{ border: '0', borderTop: '1px solid #eee', marginBottom: '40px' }} />
-      
-      {/* 댓글 영역 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h3 style={{ margin: 0 }}>댓글</h3>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={() => setCommentOrder('desc')} style={{ border: 'none', background: 'none', cursor: 'pointer', fontWeight: commentOrder === 'desc' ? 'bold' : 'normal' }}>최신순</button>
-          <button onClick={() => setCommentOrder('asc')} style={{ border: 'none', background: 'none', cursor: 'pointer', fontWeight: commentOrder === 'asc' ? 'bold' : 'normal' }}>과거순</button>
+          <button onClick={() => setCommentOrder('desc')} style={{ border: 'none', background: 'none', cursor: 'pointer', fontWeight: commentOrder === 'desc' ? 'bold' : 'normal', color: commentOrder === 'desc' ? '#333' : '#999' }}>최신순</button>
+          <button onClick={() => setCommentOrder('asc')} style={{ border: 'none', background: 'none', cursor: 'pointer', fontWeight: commentOrder === 'asc' ? 'bold' : 'normal', color: commentOrder === 'asc' ? '#333' : '#999' }}>과거순</button>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-        <input 
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          placeholder="댓글을 남겨주세요" 
-          style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #ddd' }} 
-        />
-        <button 
-          onClick={() => {
-            if (!commentText.trim()) return;
-            addCommentMutation.mutate(commentText, { onSuccess: () => setCommentText('') });
-          }}
-          disabled={addCommentMutation.isPending}
-          style={{ padding: '0 25px', borderRadius: '10px', border: 'none', backgroundColor: '#e91e63', color: '#fff', cursor: 'pointer' }}
-        >
-          {addCommentMutation.isPending ? '...' : '작성'}
-        </button>
+        <input value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="댓글 작성..." style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #ddd' }} />
+        <button onClick={() => { if (!commentText.trim()) return; addCommentMutation.mutate(commentText, { onSuccess: () => setCommentText('') }); }} style={{ padding: '0 25px', borderRadius: '10px', border: 'none', backgroundColor: '#e91e63', color: '#fff', cursor: 'pointer' }}>작성</button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {isCommentLoading ? (
-          Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
-        ) : (
+        {isCommentLoading ? <CommentSkeleton /> : (
           commentData?.pages?.map((page) => page?.data?.map((comment: any) => (
             <div key={comment.id} style={{ display: 'flex', gap: '15px', padding: '20px 0', borderBottom: '1px solid #f9f9f9' }}>
               <div style={{ width: '45px', height: '45px', borderRadius: '50%', backgroundColor: '#eee', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '15px' }}>{comment?.user?.name || '익명'}</div>
+                  <div style={{ fontWeight: 'bold' }}>{typeof comment?.user?.name === 'object' ? comment.user.name.name : (comment?.user?.name || '익명')}</div>
                   <button onClick={() => deleteCommentMutation.mutate(comment.id)} style={{ background: 'none', border: 'none', color: '#ccc', cursor: 'pointer' }}>삭제</button>
                 </div>
-                <div style={{ fontSize: '15px', marginTop: '5px' }}>{comment.content}</div>
+                <div style={{ fontSize: '15px', marginTop: '5px', color: '#555' }}>{comment.content}</div>
               </div>
             </div>
           )))
         )}
-        
-        {isFetchingNextPage && <CommentSkeleton />}
         <div ref={ref} style={{ height: '20px' }} />
       </div>
 
-      <style>{`
-        @keyframes pulse {
-          0% { opacity: 0.5; }
-          50% { opacity: 1; }
-          100% { opacity: 0.5; }
-        }
-      `}</style>
+      {isEditing && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '15px', width: '450px' }}>
+            <h2 style={{ marginTop: 0 }}>LP 수정</h2>
+            <input style={{ width: '100%', padding: '12px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ddd', boxSizing: 'border-box' }} value={editFields.title} onChange={(e) => setEditFields({ ...editFields, title: e.target.value })} placeholder="제목" />
+            <textarea style={{ width: '100%', height: '150px', padding: '12px', marginBottom: '15px', borderRadius: '5px', border: '1px solid #ddd', boxSizing: 'border-box', resize: 'none' }} value={editFields.content} onChange={(e) => setEditFields({ ...editFields, content: e.target.value })} placeholder="내용" />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={handleUpdateSubmit} style={{ flex: 1, padding: '12px', backgroundColor: '#e91e63', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>저장</button>
+              <button onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
